@@ -1,16 +1,24 @@
-# Summary
+# Repository content
 
-This script served to evaluate trading algorithm based on broken support bases.
-The algorithm should buy cheap when other investors are in panic
-and hence they are selling and the algorithm should sell higher, but still
-below the broken support base.
+This repository contains scripts simulating trading of crypto currency coins.
+
+NOTE: These scripts are proofs of concepts. They are not ready to be used for a
+real trading.
+
+# Algorithm based on broken support bases
+
+## Summary
+
+The Jupyter Notebook file `broken_supports_algorithm.ipynb` contains a
+a script simulating an algorithm based on broken support bases. The
+algorithm should buy cheap when other investors are in panic and hence they
+are selling and the algorithm should sell higher, but still below the broken
+support base.
 
 The motivation to write this script was one of the videos of Quickfingers Luc
 (such as https://www.youtube.com/watch?v=vgcFe_XO_LQ).
 
-NOTE: This is a proof of concept, not a script used for a real trading.
-
-# Environment preparation
+## Environment preparation
 
 Necessary python3 packages:
 - jupyter
@@ -21,24 +29,24 @@ You can install them via
 
 `python3 -m pip install --user jupyter pandas PyFunctional`
 
-# Execution
+## Execution
 
 1. Execute `jupyter notebook`
-1. Open `support_and_resistance__tomas-checkpoint.ipynb` in the started Jupyter
-Notebook editor.
+1. Open `broken_supports_algorithm.ipynb` in the started Jupyter Notebook
+editor.
 1. Click on "Run" for each code snippet, starting with the first code snippet
 and following with the second one, third one, etc.
 
-NOTE 1: The last code snippet contains the function call; either
+NOTE 1: The last code snippet triggers the simulation; either
 `currency_pair_evaluator.evaluate_one_time_frame_and_draw_and_close(..)` or
 `currency_pair_evaluator.evaluate_multiple_time_frames_and_draw_and_close(..)`.
 
 NOTE 2: This script is not used for a real trading, hence no secrets are
 necessary.
 
-# Algorithm
+## Algorithm
 
-## Dictionary
+### Dictionary
 
 Assume that a strong support/resistance base is being broken
 the first time. The graph of the coin is "healthy" if the price comes back
@@ -47,7 +55,7 @@ to the base price in a close future and this happens for every strong base.
 NOTE: The price can start falling/rising again just after the price has come
 back to the broken support/resistance base.
 
-## Theory of the algorithm
+### Theory of the algorithm
 
 When a strong support base is being broken in the health graph the first time,
 the script waits till the price has fallen enough and then starts buying.
@@ -56,7 +64,7 @@ before. Since the script operates on the health graph, the price needs to
 come back to the broken support base in the close future. The script sells all
 coins even below the base price to reduce risk caused by other bots.
 
-## Challenges
+### Challenges
 
 The theory contains expressions which needs to precisely specified:
  
@@ -67,14 +75,14 @@ The theory contains expressions which needs to precisely specified:
 1. How long can the comeback to the price take?
 1. What should the script do when the comeback seems to not come?
 
-## Implementation
+### Implementation
 
-### What means that a base is strong?
+#### What means that a base is strong?
 
 
 
 TODO Picture
 
-# Script Customization
+## Script Customization
 
 TODO Picture
