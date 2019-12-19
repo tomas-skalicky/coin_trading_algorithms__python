@@ -50,7 +50,7 @@ back to the broken support/resistance base.
 ## Theory of the algorithm
 
 When a strong support base is being broken in the health graph the first time,
-he script waits till the price has fallen enough and then starts buying.
+the script waits till the price has fallen enough and then starts buying.
 If the price continues falling, the script continues buying, but more than
 before. Since the script operates on the health graph, the price needs to
 come back to the broken support base in the close future. The script sells all
@@ -68,6 +68,7 @@ The theory contains expressions which needs to precisely specified:
 1. What should the script do when the comeback seems to not come?
 
 ## Implementation
+
 ### What means that a base is strong?
 
 
@@ -75,4 +76,5 @@ The theory contains expressions which needs to precisely specified:
 TODO Picture
 
 # Script Customization
+
 TODO Picture
