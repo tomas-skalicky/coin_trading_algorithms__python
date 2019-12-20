@@ -64,7 +64,7 @@ before. Since the script operates on the health graph, the price needs to
 come back to the broken support base in the close future. The script sells all
 coins even below the base price to reduce risk caused by other bots.
 
-### Challenges
+### Challenges of the algorithm
 
 The theory contains expressions which needs to precisely specified:
  
@@ -75,14 +75,44 @@ The theory contains expressions which needs to precisely specified:
 1. How long can the comeback to the price take?
 1. What should the script do when the comeback seems to not come?
 
-### Implementation
+### Implementation of the algorithm
 
 #### What means that a base is strong?
 
+//TODO analyze the script
 
+//TODO continue with other questions
 
-TODO Picture
+//TODO Picture of graph with supports, buys, sells
 
-## Script Customization
+### Evaluation of the algorithm
 
-TODO Picture
+//TODO Picture of finding the optimum
+
+## Implementation details
+
+### How to determine training data and data used for simulation
+
+The training data directly precedes the data used for simulation. Both
+the length of training and the length of simulation are configurable in the
+last code snippet and their units are number of weeks. The former is hold in
+the variable `old_week_count`, the latter (also called `new_week_count`) is
+hold in the first item of the input pair of
+`currency_pair_evaluator.evaluate_one_time_frame_and_draw_and_close(..)` or
+`currency_pair_evaluator.evaluate_multiple_time_frames_and_draw_and_close
+(..)`. The second item of the input pair of the two aforementioned functions
+is an offset of both the training data and data for simulation:
+
+Training data:
+```
+<NOW - old_week_count - new_week_count - offset, NOW - new_week_count - offset>
+```
+
+Data user for simulation:
+```
+<NOW - new_week_count - offset, NOW - offset>
+```
+
+ 
+//TODO parallel processing
+//TODO drawing
