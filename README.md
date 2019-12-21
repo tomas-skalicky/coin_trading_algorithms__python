@@ -1,22 +1,22 @@
 # Repository content
 
-This repository contains scripts simulating trading of crypto currency coins.
+This repository contains algorithms simulating trading of crypto currency coins.
 
-NOTE: These scripts are proofs of concepts. They are not ready to be used for a
-real trading.
+NOTE: These algorithms are proofs of concepts. They are not ready to be used
+for a real trading.
 
 # Algorithm based on broken supports
 
 ## Summary
 
 The Jupyter Notebook file `broken_supports_algorithm.ipynb` contains a
-a script simulating an algorithm based on broken supports. The
+an algorithm based on broken supports. The
 algorithm should buy cheap when other investors are in panic and hence they
 are selling and the algorithm should sell higher, but still below the broken
 support.
 
-The motivation to write this script was one of the videos of Quickfingers Luc
-(such as https://www.youtube.com/watch?v=vgcFe_XO_LQ).
+The motivation to develop this algorithm was one of the videos of Quickfingers
+Luc (such as https://www.youtube.com/watch?v=vgcFe_XO_LQ).
 
 ## Environment preparation
 
@@ -41,7 +41,7 @@ NOTE 1: The last code snippet triggers the simulation; either
 `currency_pair_evaluator.evaluate_one_time_frame_and_draw_and_close(..)` or
 `currency_pair_evaluator.evaluate_multiple_time_frames_and_draw_and_close(..)`.
 
-NOTE 2: This script is not used for a real trading, hence no secrets are
+NOTE 2: This algorithm is not used for a real trading, hence no secrets are
 necessary.
 
 ## Dictionary
@@ -57,13 +57,13 @@ The **base** is either support or resistance. Note a support may become
 a resistance and vice versa.
 
 The specification when a support / resistance is strong and when it is not is
-left for later (see TODO).
+left for later (see the section "How to identify a strong enough base?").
 
-Assume that a strong support/resistance is being broken
+Assume that a strong support (resp. resistance) is being broken
 the first time. The graph of the coin is **healthy** if the price comes back
 to the base price in a close future and this happens for every strong base
-. Note the price can start falling/rising again just after the price has come
-back to the broken support/resistance.
+. Note the price can start falling (resp. rising) again just after the price has
+come back to the broken support (resp. resistance).
 
 The **base currency** is the currency kept long term due to limited volatility
 and high liquidity. The **market (=target) currency** is the currency which
@@ -76,51 +76,103 @@ currency BTC and base currency USDT.
 ### Theory of the algorithm
 
 When a strong support is being broken in the health graph the first time,
-the script waits till the price has fallen enough and then starts buying.
-If the price continues falling, the script continues buying, but more than
-before. Since the script operates on the health graph, the price needs to
-come back to the broken support in the close future. The script sells all
+the algorithm waits till the price has fallen enough and then starts buying.
+If the price continues falling, the algorithm continues buying, but more than
+before. Since the algorithm operates on the health graph, the price needs to
+come back to the broken support in the close future. The algorithm sells all
 coins even below the base price to reduce risk caused by other bots.
 
 ### Challenges of the algorithm
 
 The theory contains expressions which needs to precisely specified:
  
-1. How to identify a base price?
-1. What means that a base is strong?
+1. How to identify a strong enough base?
 1. How to identify that a base has been broken?
-1. When should the script start buying?
-1. How much should the script buy?
-1. When should the script sell coins?
+1. When should the algorithm start buying?
+1. How much should the algorithm buy?
+1. When should the algorithm sell coins?
 1. How long can the comeback to the price take?
-1. What should the script do when the comeback seems to not come?
+1. What should the algorithm do when the comeback seems to not come?
 
 ### Implementation of the algorithm
 
-#### How to identify a base price?
+#### How to identify a strong enough base?
 
-Humans generally prefers round numbers and may tend to use them as bounderies
-in their limit orders. Bots operating on the exchanges may on the other side
-follow large variety of different strategies. Me and my friend Preslav Rachev
-(his LinkedIn profile https://www.linkedin.com/in/preslavrachev/) came up with
-an idea to divide the chart into price bins //TODO1
+Human generally prefers round numbers and may tend to use them as boundaries
+in their limit orders. Trading bots operating on exchanges may follow large
+variety of different strategies. Me and my friend Preslav
+Rachev (his LinkedIn profile https://www.linkedin.com/in/preslavrachev/) came
+up with an idea to divide the chart into price intervals further called
+**price bins** and analyze these bins for being a base. This approach also
+helps to filter out candlesticks going slightly below (resp. above) a
+particular price since these candlesticks do not necessary mean that the
+support (resp. resistance) has been being broken.
 
- to create price bins (=zones) and I implemented The base price is typically a round number. However, if the arbitrage is possible what a cryptocurrency exchanges are
-We cannot rely on the precise price. It may be that the a support has not been broken, even though the price has fallen slightly below the support price
+The goal of the algorithm is to use the panic situations. These can be
+characterized for instance by larger volume and major price changes. The
+algorithm is using **volume**.
 
+The algorithm denotes a price bin as a base only if all of three following
+conditions are satisfied:
+- if the maximum of volume of all candlesticks in the price bin exceeds a
+certain value calculated
+  - using the mean of volume of all training candlesticks,
+  - using the median of volume of all training candlesticks and
+  - using `base_recognition_coefficient` (see the section "Further algorithm
+configuration") and
+- if the mean of volume - of all candlesticks directly preceding the
+currently analyzed candlestick and belonging to the same price bin - is
+greater than a mean of volume of all training candlesticks and eventually
+- if the **base score** of the price bin is equal or greater that a required
+lower bound `min_base_score` (see the section "Further algorithm
+configuration"). The base score is calculated using the maximal volume - of all
+candlesticks directly preceding the currently analyzed candlestick and
+belonging to the same price bin -, using maximal volume of all preceding
+candlesticks and using the maximal volume of the preceding price bin (to
+express a trend).
 
+Note the identification and re-assessment whether a price bin is a base
+happens both in the training and simulation phase.
 
-#### What means that a base is strong?
+#### How to identify that a base has been broken?
 
-//TODO analyze the script
+The algorithm does not operate with the term broken base. The algorithm uses
+a configuration parameter `min_buy_order_profit_in_percents` instead to
+determine when the algorithm can start buying. See more about the configuration
+parameter in the section "Further algorithm configuration".
 
-//TODO continue with other questions
+#### When should the algorithm start buying?
 
-//TODO Picture of graph with supports, buys, sells
+The answer is covered in the section "How to identify that a base has been
+broken?".
+
+#### How much should the algorithm buy?
+
+The algorithm uses the size of the price fall, the score of the broken
+base and the configuration parameter
+`volume_unit_target_currency_to_buy_in_percents` to determine how much coins
+should be ideally bought. The larger the price fall
+and the greater the base score, the more the algorithm wants to buy
+. There is a configurable upper bound for buying (see the configuration
+parameter `max_buy_order_volume_in_wallet_percents`).
+
+#### When should the algorithm sell coins?
+
+//TODO1
+
+#### How long can the comeback to the price take?
+
+//TODO1
+
+#### What should the algorithm do when the comeback seems to not come?
+
+//TODO1
 
 ### Evaluation of the algorithm
 
 //TODO Picture of finding the optimum
+
+//TODO Picture of graph with supports, buys, sells. Link to the drawing.
 
 ## Implementation details
 
@@ -152,7 +204,7 @@ data used in simulation are downloaded in two requests.
 
 ### Further algorithm configuration
 
-In the `__init__` function of the `AlgorithmConfig` class:
+In the function `__init__` of the class `AlgorithmConfig`:
 
 - `initial_base_currency_amount` represents the initial budget for the
 simulation. In the base currency.
@@ -160,7 +212,8 @@ simulation. In the base currency.
 volume in the market currency which can be bought at once. The
 unit is the number of percents of the total budget in the wallet.
 - `min_base_score` represents the lower bound of score when price bin is
-identified as a base strong enough. //TODO2 how is the score calculated
+identified as a strong enough base. See the section "How to identify a strong
+enough base?"
 - `min_buy_order_profit_in_percents`. The profit calculated by the algorithm
 needs to exceed this minimum to place a buy order. The algorithm calculates
 the difference between the current price and the last price (= candlestick) of
@@ -172,7 +225,7 @@ current base becomes the most recent one.
 - `profit_to_get_back_investment` represents the minimal profit in percents
 to pay all fees and not to have losses.
 
-In the `evaluate` function of the `CurrencyPairEvaluator` class:
+In the function `evaluate` of the class `CurrencyPairEvaluator`:
 
 - `max_old_price_bin_count` represents the number of price bins in which the
 price interval (0, maximum of highs in the training data). Example: If
@@ -181,18 +234,16 @@ in the training data are between 2000 USDT and 5000 USDT, then each price bin
 is 25 USDT large (`5000 / 200 = 25`).
 - `max_base_score` represents the upper bound of the base score. If the
 calculation of the score results with the higher score, this value is used
-instead. //TODO2 how is the score calculated
- 
-//TODO3
-base_recognition_coefficient
- ... in np.linspace(1.7, 4, num=2)
- - median_volume = old_periods[PeriodColumns.VOLUME.column_name].median()
- - mean_volume = old_periods[PeriodColumns.VOLUME.column_name].mean()
- - multiplication_threshold = base_recognition_coefficient * mean_volume / median_volume
- 
-volume_unit_target_currency_to_buy_in_percents
- ... in np.linspace(0.75, 6, num=2)
+instead. See the section "How to identify a strong enough base?"
+- `base_recognition_coefficient` represents a configuration parameter directly
+influencing which bases are identified as strong enough and which are not. See
+more in the section "How to identify a strong enough base?"
+- `volume_unit_target_currency_to_buy_in_percents` represents a configuration
+parameter directly influencing how much the algorithm should buy. See the
+section "How much should the algorithm buy?"
  
 //TODO parallel processing
 
 //TODO drawing
+
+//TODO Picture of graph with supports, buys, sells
