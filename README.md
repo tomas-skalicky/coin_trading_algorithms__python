@@ -2,7 +2,7 @@
 
 This repository contains scripts simulating trading of crypto currency coins.
 
-NOTE: These scripts are proofs of concepts. They are not ready to be used
+Disclaimer: These scripts are proofs of concepts. They are not ready to be used
 for a real trading.
 
 # Algorithm based on broken supports
@@ -353,8 +353,8 @@ connects the buy and sell trade.
 
 #### Chart with profits of different algorithm configurations
 
-The second chart serves to find by trial and error better and better
-configuration of the algorithm.
+The second chart serves to compare multiple algorithm configurations and
+identify the one out of them which is the most profitable.
 
 ![Enriched chart of the currency pairt](resources/profit_3d_chart.png)
 
