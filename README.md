@@ -63,7 +63,7 @@ The **base** is either support or resistance. Note a support may become
 a resistance and vice versa.
 
 The specification when a support / resistance is strong and when it is not is
-left for later (see the section "How to identify a strong enough base?").
+left for later (see the section "How is a strong enough base identified?").
 
 Assume that a strong support (resp. resistance) is being broken
 the first time. The graph of the currency pair is **healthy** if the price comes
@@ -97,6 +97,8 @@ The theory contains expressions which needs to precisely specified:
 1. When should the algorithm sell market currency?
 1. How long can the comeback to the price broken support take?
 1. What should the algorithm do when the comeback seems to not come?
+
+These challenges are addressed in the section "Implementation of the algorithm".
 
 ### Implementation of the algorithm
 
@@ -192,11 +194,16 @@ has not happened yet may occur in the future. The algorithm does not cover
 this situation. The author of aforementioned video Quickfingers Luc
 recommends to minimize losses.
 
-### Evaluation of the algorithm
+### Conclusion
 
-//TODO Picture of finding the optimum
-
-//TODO Picture of graph with supports, buys, sells. Link to the drawing.
+Based on the testing of the implemented algorithm and playing around with the
+configuration of the algorithm I came up with a conclusion that the basic idea
+using an identification of bases based on volume was the first reasonable step
+to a production ready trading algorithm. Furthermore I found out that trying to
+find an optimal configuration of the algorithm which would fit to all conditions
+was not possible. Different time periods of a single currency pair or
+same time periods of two different highly correlating currency pairs yield
+the best profit in a different configuration.
 
 ## Implementation details
 
@@ -236,8 +243,8 @@ simulation. In the base currency.
 amount of the market currency which can be bought at once. The
 unit is the number of percents of the total budget in the wallet.
 - `min_base_score` represents the lower bound of score when price bin is
-identified as a strong enough base. See the section "How to identify a strong
-enough base?"
+identified as a strong enough base. See the section "How is a strong enough
+base identified?"
 - `min_buy_order_profit_in_percents`. The profit calculated by the algorithm
 needs to exceed this minimum to place a buy order. The algorithm calculates
 the difference between the current price and the last price (= candlestick) of
@@ -263,16 +270,18 @@ in the training data are between 2000 USDT and 5000 USDT, then each price bin
 is 25 USDT large (`5000 / 200 = 25`).
 - `max_base_score` represents the upper bound of the base score. If the
 calculation of the score results with the higher score, this value is used
-instead. See the section "How to identify a strong enough base?"
+instead. See the section "How is a strong enough base identified?"
 - `base_recognition_coefficient` represents a configuration parameter directly
 influencing which bases are identified as strong enough and which are not. See
-more in the section "How to identify a strong enough base?"
+more in the section "How is a strong enough base identified?"
 - `volume_unit_target_currency_to_buy_in_percents` represents a configuration
 parameter directly influencing how much the algorithm should buy. See the
-section "How much should the algorithm buy?"
+section "How much market currency should the algorithm buy?"
  
 //TODO parallel processing
 
 //TODO drawing
 
-//TODO Picture of graph with supports, buys, sells
+//TODO Picture of finding the optimum
+
+//TODO Picture of graph with supports, buys, sells. Link to the drawing.
