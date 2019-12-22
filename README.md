@@ -321,13 +321,19 @@ configurations.
 
 ### Output charts
 
-This section contains sample output charts with legend. The first chart is an
-chart of the currency pair enriched with data of a single algorithm run.
-Therefore, there are so many of these charts in the output as it is the
-number of different algorithm configurations multiplied by number of
+This section contains sample output charts with legend.
+
+#### Enriched currency pair chart
+
+The first chart is an chart of the currency pair enriched with data of a single
+algorithm run. Therefore, there are so many of these charts in the output as
+it is the number of different algorithm configurations multiplied by number of
 different training data and data for simulation.
 
 ![Enriched chart of the currency pairt](resources/enriched_chart.png)
+
+The unit of x-axis is the number of downloaded candlestick. The unit of y
+-axis is the average weighted price.
 
 The curve being **blue** at the left part of the chart and **orange** in the
 right part is a curve of weighted average prices coming from candlestick data
@@ -347,4 +353,12 @@ connects the buy and sell trade.
 
 #### Chart with profits of different algorithm configurations
 
-//TODO Picture of finding the optimum
+The second chart serves to find by trial and error better and better
+configuration of the algorithm.
+
+![Enriched chart of the currency pairt](resources/profit_3d_chart.png)
+
+The chart has three axes. On the first axis there is the configuration parameter
+`base_recognition_coefficient`, on the second one there is the configuration
+parameter `volume_unit_target_currency_to_buy_in_percents` and the y-axis shows
+the profit in percents.
