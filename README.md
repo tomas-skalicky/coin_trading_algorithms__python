@@ -147,8 +147,7 @@ a configuration parameter `min_buy_order_profit_in_percents` instead to
 determine when the algorithm can start buying. See more about the configuration
 parameter in the section "Further algorithm configuration".
 
-#### When should the algorithm start buying? (= What is the highest
-"allowed" purchase price?)
+#### When should the algorithm start buying? (= What is the highest "allowed" purchase price?)
 
 The answer is covered in the section "How is a broken base identified?".
 
