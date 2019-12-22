@@ -9,7 +9,7 @@ for a real trading.
 
 ## Summary
 
-The Jupyter Notebook file `broken_supports_algorithm.ipynb` contains a
+The Jupyter Notebook file `broken_supports_algorithm.ipynb` contains
 an algorithm based on broken supports. The algorithm should buy cheap when
 other investors are in panic and hence they are selling. Then, when the
 investors have calmed down and the price has risen again and come closer to the
@@ -25,7 +25,7 @@ Necessary python3 packages:
 - pandas
 - PyFunctional
 
-You can install them via
+You can install them for instance via
 
 `python3 -m pip install --user jupyter pandas PyFunctional`
 
@@ -35,22 +35,21 @@ You can install them via
 1. Open `broken_supports_algorithm.ipynb` in the started Jupyter Notebook
 editor.
 1. Click on "Run" for each code snippet, starting with the first code snippet
-and following with the second one, third one, etc.
-
-NOTE 1: The last code snippet triggers the simulation; either
+and following with the second one, third one, etc. The last code snippet
+triggers the simulation; either
 `currency_pair_evaluator.evaluate_one_time_frame_and_draw_and_close(..)` or
 `currency_pair_evaluator.evaluate_multiple_time_frames_and_draw_and_close(..)`.
 
-NOTE 2: This algorithm is not used for a real trading, hence no secrets are
-necessary.
+NOTE: This algorithm is not designed to be used for a real trading, hence no
+secrets are necessary.
 
 ## Dictionary
 
-The **base currency** is the currency kept long term due to limited volatility
-and high liquidity. The **market (=target) currency** is the currency which
-ups and downs expressed in the base currency wanted to be leveraged to
-achieve profit. The **currency pair** BTC-USDT consists of the market
-currency BTC and base currency USDT.
+The **base currency** is the currency kept long term due to its limited
+volatility and high liquidity. The **market (=target) currency** is the
+currency which ups and downs expressed in the base currency wanted to be
+leveraged to achieve profit. The **currency pair** BTC-USDT consists of the
+market currency BTC and the base currency USDT.
 
 From https://en.wikipedia.org/wiki/Support_and_resistance :
 
@@ -62,10 +61,10 @@ touches of price without a breakthrough of the level.
 The **base** is either support or resistance. Note a support may become
 a resistance and vice versa.
 
-The specification when a support / resistance is strong and when it is not is
-left for later (see the section "How is a strong enough base identified?").
+The specification which base is strong and which is not
+can be found in the section "How is a strong base identified?".
 
-Assume that a strong support (resp. resistance) is being broken
+Assume that a strong base is being broken
 the first time. The graph of the currency pair is **healthy** if the price comes
 back to the base price in a close future and this happens for every strong base
 . Note the price can start falling (resp. rising) again just after the price has
@@ -89,7 +88,7 @@ currency coins is tried to be sold for higher price.
 
 The theory contains expressions which needs to precisely specified:
  
-1. How is a strong enough base identified?
+1. How is a strong base identified?
 1. How is a broken base identified?
 1. When should the algorithm start buying? (= What is the highest
 "allowed" purchase price?)
@@ -102,7 +101,7 @@ These challenges are addressed in the section "Implementation of the algorithm".
 
 ### Implementation of the algorithm
 
-#### How is a strong enough base identified?
+#### How is a strong base identified?
 
 Human generally prefers round numbers and may tend to use them as boundaries
 in their limit orders. Trading bots operating on exchanges may follow large
@@ -243,7 +242,7 @@ simulation. In the base currency.
 amount of the market currency which can be bought at once. The
 unit is the number of percents of the total budget in the wallet.
 - `min_base_score` represents the lower bound of score when price bin is
-identified as a strong enough base. See the section "How is a strong enough
+identified as a strong base. See the section "How is a strong
 base identified?"
 - `min_buy_order_profit_in_percents`. The profit calculated by the algorithm
 needs to exceed this minimum to place a buy order. The algorithm calculates
@@ -251,7 +250,7 @@ the difference between the weighted average price of the current candlestick and
 the low/high price of the last candlestick of the most recent base.
 - `previous_and_current_base_keep_coefficient` is used during the simulation
 and helps to determine what is the most recent base. The most recent base is
-held in variables, however when the current base is strong enough, the
+held in variables, however when the current base is strong, the
 current base becomes the most recent one.
 - `profit_to_get_back_investment` represents the minimal profit in percents
 to pay all fees and not to have losses.
@@ -270,10 +269,10 @@ in the training data are between 2000 USDT and 5000 USDT, then each price bin
 is 25 USDT large (`5000 / 200 = 25`).
 - `max_base_score` represents the upper bound of the base score. If the
 calculation of the score results with the higher score, this value is used
-instead. See the section "How is a strong enough base identified?"
+instead. See the section "How is a strong base identified?"
 - `base_recognition_coefficient` represents a configuration parameter directly
-influencing which bases are identified as strong enough and which are not. See
-more in the section "How is a strong enough base identified?"
+influencing which bases are identified as strong and which are not. See
+more in the section "How is a strong base identified?"
 - `volume_unit_target_currency_to_buy_in_percents` represents a configuration
 parameter directly influencing how much the algorithm should buy. See the
 section "How much market currency should the algorithm buy?"
