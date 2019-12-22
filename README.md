@@ -95,7 +95,7 @@ The theory contains expressions which needs to precisely specified:
 "allowed" purchase price?)
 1. How much market currency should the algorithm buy?
 1. When should the algorithm sell market currency?
-1. How long can the comeback to the price take?
+1. How long can the comeback to the price broken support take?
 1. What should the algorithm do when the comeback seems to not come?
 
 ### Implementation of the algorithm
@@ -178,13 +178,19 @@ a configuration parameter `min_target_currency_investment` determining the
 minimal amount any order can be created with (see more in the section
 "Further algorithm configuration").
 
-#### How long can the comeback to the price take?
+#### How long can the comeback to the price of broken support take?
 
-//TODO1
+The algorithm does not cover this situation. The algorithm waits till the
+price comes back. The production ready algorithm would need to cover this
+case. Note the waiting period may directly depends on the strength of broken
+support (= base score).
 
 #### What should the algorithm do when the comeback seems to not come?
 
-//TODO1
+Even though you are convinced you have found perfectly health graph, what
+has not happened yet may occur in the future. The algorithm does not cover
+this situation. The author of aforementioned video Quickfingers Luc
+recommends to minimize losses.
 
 ### Evaluation of the algorithm
 
@@ -243,6 +249,11 @@ current base becomes the most recent one.
 - `profit_to_get_back_investment` represents the minimal profit in percents
 to pay all fees and not to have losses.
 
+In the constructor function `__init__` of the class `CurrencyPair`:
+
+- `min_target_currency_investment` determines the minimal amount of market
+currency that any buy or sell order can be created with.
+
 In the function `evaluate` of the class `CurrencyPairEvaluator`:
 
 - `max_old_price_bin_count` represents the number of price bins in which the
@@ -259,11 +270,6 @@ more in the section "How to identify a strong enough base?"
 - `volume_unit_target_currency_to_buy_in_percents` represents a configuration
 parameter directly influencing how much the algorithm should buy. See the
 section "How much should the algorithm buy?"
-
-In the constructor function `__init__` of the class `CurrencyPair`:
-
-- `min_target_currency_investment` determines the minimal amount of market
-currency that any buy or sell order can be created with.
  
 //TODO parallel processing
 
