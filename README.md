@@ -10,10 +10,10 @@ for a real trading.
 ## Summary
 
 The Jupyter Notebook file `broken_supports_algorithm.ipynb` contains a
-an algorithm based on broken supports. The
-algorithm should buy cheap when other investors are in panic and hence they
-are selling and the algorithm should sell higher, but still below the broken
-support.
+an algorithm based on broken supports. The algorithm should buy cheap when
+other investors are in panic and hence they are selling. Then, when the
+investors have calmed down and the price has risen again and come closer to the
+broken support, the algorithm should sell.
 
 The motivation to develop this algorithm was one of the videos of Quickfingers
 Luc (such as https://www.youtube.com/watch?v=vgcFe_XO_LQ).
@@ -46,6 +46,12 @@ necessary.
 
 ## Dictionary
 
+The **base currency** is the currency kept long term due to limited volatility
+and high liquidity. The **market (=target) currency** is the currency which
+ups and downs expressed in the base currency wanted to be leveraged to
+achieve profit. The **currency pair** BTC-USDT consists of the market
+currency BTC and base currency USDT.
+
 From https://en.wikipedia.org/wiki/Support_and_resistance :
 
 > In stock market technical analysis, **support** and **resistance** are certain
@@ -60,16 +66,10 @@ The specification when a support / resistance is strong and when it is not is
 left for later (see the section "How to identify a strong enough base?").
 
 Assume that a strong support (resp. resistance) is being broken
-the first time. The graph of the coin is **healthy** if the price comes back
-to the base price in a close future and this happens for every strong base
+the first time. The graph of the currency pair is **healthy** if the price comes
+back to the base price in a close future and this happens for every strong base
 . Note the price can start falling (resp. rising) again just after the price has
 come back to the broken support (resp. resistance).
-
-The **base currency** is the currency kept long term due to limited volatility
-and high liquidity. The **market (=target) currency** is the currency which
-ups and downs expressed in the base currency wanted to be leveraged to
-achieve profit. The **currency pair** BTC-USDT consists of the market
-currency BTC and base currency USDT.
 
 ## Algorithm
 
@@ -77,26 +77,30 @@ currency BTC and base currency USDT.
 
 When a strong support is being broken in the health graph the first time,
 the algorithm waits till the price has fallen enough and then starts buying.
-If the price continues falling, the algorithm continues buying, but more than
-before. Since the algorithm operates on the health graph, the price needs to
-come back to the broken support in the close future. The algorithm sells all
-coins even below the base price to reduce risk caused by other bots.
+If the price continues falling, the algorithm continues buying, even more
+than before. Since the algorithm operates on the health graph, there
+is a strong assumption the price comes back to the broken support in the close
+future. The algorithm sells such an amount of the market currency coins for the
+price not higher than the base price that the algorithms retrieves its initial
+investment back and hereby reduces the chance of loss. The rest of the market
+currency coins is tried to be sold for higher price.
 
 ### Challenges of the algorithm
 
 The theory contains expressions which needs to precisely specified:
  
-1. How to identify a strong enough base?
-1. How to identify that a base has been broken?
-1. When should the algorithm start buying?
-1. How much should the algorithm buy?
-1. When should the algorithm sell coins?
+1. How is a strong enough base identified?
+1. How is a broken base identified?
+1. When should the algorithm start buying? (= What is the highest
+"allowed" purchase price?)
+1. How much market currency should the algorithm buy?
+1. When should the algorithm sell market currency?
 1. How long can the comeback to the price take?
 1. What should the algorithm do when the comeback seems to not come?
 
 ### Implementation of the algorithm
 
-#### How to identify a strong enough base?
+#### How is a strong enough base identified?
 
 Human generally prefers round numbers and may tend to use them as boundaries
 in their limit orders. Trading bots operating on exchanges may follow large
@@ -125,40 +129,54 @@ currently analyzed candlestick and belonging to the same price bin - is
 greater than a mean of volume of all training candlesticks and eventually
 - if the **base score** of the price bin is equal or greater that a required
 lower bound `min_base_score` (see the section "Further algorithm
-configuration"). The base score is calculated using the maximal volume - of all
-candlesticks directly preceding the currently analyzed candlestick and
-belonging to the same price bin -, using maximal volume of all preceding
-candlesticks and using the maximal volume of the preceding price bin (to
-express a trend).
+configuration"). The base score is calculated
+  - using the maximum of volume - of all candlesticks directly preceding the
+   currently analyzed candlestick and belonging to the same price bin
+    -,
+  - using the maximum of volume of all preceding candlesticks and
+  - using the maximum of volume of the preceding price bin (to express a trend).
 
 Note the identification and re-assessment whether a price bin is a base
 happens both in the training and simulation phase.
 
-#### How to identify that a base has been broken?
+#### How is a broken base identified?
 
 The algorithm does not operate with the term broken base. The algorithm uses
 a configuration parameter `min_buy_order_profit_in_percents` instead to
 determine when the algorithm can start buying. See more about the configuration
 parameter in the section "Further algorithm configuration".
 
-#### When should the algorithm start buying?
+#### When should the algorithm start buying? (= What is the highest
+"allowed" purchase price?)
 
-The answer is covered in the section "How to identify that a base has been
-broken?".
+The answer is covered in the section "How is a broken base identified?".
 
-#### How much should the algorithm buy?
+#### How much market currency should the algorithm buy?
 
 The algorithm uses the size of the price fall, the score of the broken
 base and the configuration parameter
-`volume_unit_target_currency_to_buy_in_percents` to determine how much coins
-should be ideally bought. The larger the price fall
-and the greater the base score, the more the algorithm wants to buy
+`volume_unit_target_currency_to_buy_in_percents` to determine how much market
+currency should be ideally bought. The larger the price fall
+and the greater the base score is, the more the algorithm wants to buy
 . There is a configurable upper bound for buying (see the configuration
 parameter `max_buy_order_volume_in_wallet_percents`).
 
-#### When should the algorithm sell coins?
+#### When should the algorithm sell market currency?
 
-//TODO1
+The algorithm creates sell order(s) whenever a buy order has been
+successfully executed. It means that each sell order is bound to a
+successfully executed buy order.
+
+One of the sell orders is created with the base
+price and with such an amount of the market currency coins that the algorithm
+retrieves its initial investment back and hereby reduces the chance of loss.
+The rest of the market currency coins is tried to be sold - divided in
+possibly more sell orders - for higher price to increase a profit.
+The creation of sell orders follow the strategy that the higher the sell price
+is, the lower amount of market currency the order is created with. Plus there is
+a configuration parameter `min_target_currency_investment` determining the
+minimal amount any order can be created with (see more in the section
+"Further algorithm configuration").
 
 #### How long can the comeback to the price take?
 
@@ -204,12 +222,12 @@ data used in simulation are downloaded in two requests.
 
 ### Further algorithm configuration
 
-In the function `__init__` of the class `AlgorithmConfig`:
+In the constructor function `__init__` of the class `AlgorithmConfig`:
 
 - `initial_base_currency_amount` represents the initial budget for the
 simulation. In the base currency.
 - `max_buy_order_volume_in_wallet_percents` represents the upper bound of
-volume in the market currency which can be bought at once. The
+amount of the market currency which can be bought at once. The
 unit is the number of percents of the total budget in the wallet.
 - `min_base_score` represents the lower bound of score when price bin is
 identified as a strong enough base. See the section "How to identify a strong
@@ -241,6 +259,11 @@ more in the section "How to identify a strong enough base?"
 - `volume_unit_target_currency_to_buy_in_percents` represents a configuration
 parameter directly influencing how much the algorithm should buy. See the
 section "How much should the algorithm buy?"
+
+In the constructor function `__init__` of the class `CurrencyPair`:
+
+- `min_target_currency_investment` determines the minimal amount of market
+currency that any buy or sell order can be created with.
  
 //TODO parallel processing
 
