@@ -1,8 +1,8 @@
 # Repository content
 
-This repository contains algorithms simulating trading of crypto currency coins.
+This repository contains scripts simulating trading of crypto currency coins.
 
-NOTE: These algorithms are proofs of concepts. They are not ready to be used
+NOTE: These scripts are proofs of concepts. They are not ready to be used
 for a real trading.
 
 # Algorithm based on broken supports
@@ -247,8 +247,8 @@ identified as a strong enough base. See the section "How is a strong enough
 base identified?"
 - `min_buy_order_profit_in_percents`. The profit calculated by the algorithm
 needs to exceed this minimum to place a buy order. The algorithm calculates
-the difference between the current price and the last price (= candlestick) of
-the most recent base.
+the difference between the weighted average price of the current candlestick and
+the low/high price of the last candlestick of the most recent base.
 - `previous_and_current_base_keep_coefficient` is used during the simulation
 and helps to determine what is the most recent base. The most recent base is
 held in variables, however when the current base is strong enough, the
@@ -278,10 +278,73 @@ more in the section "How is a strong enough base identified?"
 parameter directly influencing how much the algorithm should buy. See the
 section "How much market currency should the algorithm buy?"
  
-//TODO parallel processing
+### Parallel processing
 
-//TODO drawing
+The script has two modes: one accepting a single pair of
+`(new_week_count, offset)`, the other accepting multiple such pairs. The
+former uses the function
+`CurrencyPairEvaluator.evaluate_one_time_frame_and_draw_and_close(..)`, the
+latter uses the function
+`CurrencyPairEvalutor.evaluate_multiple_time_frames_and_draw_and_close
+(..)`. Both modes calls `CurrencyPairEvaluator.evaluate(..)` under the hood
+. The single-pair mode calls the function once, the multiple-pairs mode calls
+the function so many times as it is equal to the number of input pairs. Note
+the processing of the function `evaluate(..)` in the multiple-pair model is
+blocking, one pair at a time.
+
+The function `evaluate(..)` contains a quadruple for-loop which enables the user
+to execute the algorithm with various configurations in parallel. Each of these
+for-loops iterate through one of four selected configuration parameters:
+- `max_old_price_bin_count`
+- `max_base_score`
+- `base_recognition_coefficient`
+- `volume_unit_target_currency_to_buy_in_percents`
+
+See more information about the configuration parameters in the section "Further
+algorithm configuration".
+
+All configuration parameters are passed to a function `Pool.apply_async(..)`
+together with information what function should be called, 
+`CurrencyPairOneTimeFrameEvaluator.create_config_and_evaluate_algorithm(..)`,
+and what should happen with the result,
+`CurrencyPairOneTimeFrameEvaluator.process_result(..)`. The
+function `create_config_and_evaluate_algorithm(..)` processes the training data
+and simulate the trading, the function prints out algorithm configuration,
+information about price bins, orders, trading history and wallet and draw
+an enriched chart of the currency pair. See more details in the section
+"Output charts".
+
+The result data are collected in the variable
+`CurrencyPairOneTimeFrameEvaluator.result_tuple_list`, converted to suitable
+format and rendered in a 3D chart comparing the overall profit of algorithm
+configurations.
+
+### Output charts
+
+This section contains sample output charts with legend. The first chart is an
+chart of the currency pair enriched with data of a single algorithm run.
+Therefore, there are so many of these charts in the output as it is the
+number of different algorithm configurations multiplied by number of
+different training data and data for simulation.
+
+![Enriched chart of the currency pairt](resources/enriched_chart.png)
+
+The curve being **blue** at the left part of the chart and **orange** in the
+right part is a curve of weighted average prices coming from candlestick data
+downloaded from Poloniex. The **vertical grey line** where the blue curve
+becomes orange emphasises where the training phase ended (the left blue part)
+and the simulation phase started (the right orange part).
+
+The **purple lines** denotes identified bases. The width of the line signalizes
+the strength of the base. The beginning of the line shows where the base was
+identified.
+
+The **green larger dots** marks the places where the algorithm bought the
+market currency coins. The vertical green dotted line coming to these points
+shows what was the reference broken base for the purchase. The **red larger
+dots** marks the places where the algorithm sold coins. The red dotted line
+connects the buy and sell trade.
+
+#### Chart with profits of different algorithm configurations
 
 //TODO Picture of finding the optimum
-
-//TODO Picture of graph with supports, buys, sells. Link to the drawing.
