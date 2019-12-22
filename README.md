@@ -350,7 +350,7 @@ shows what was the reference broken base for the purchase. The **red larger
 dots** marks the places where the algorithm sold coins. The red dotted line
 connects the buy and sell trade.
 
-#### Chart with profits of different algorithm configurations
+#### Chart with total profits of different algorithm configurations
 
 The second chart serves to compare multiple algorithm configurations and
 identify the one out of them which is the most profitable.
